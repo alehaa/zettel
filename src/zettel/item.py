@@ -7,7 +7,7 @@
 # this source code.
 
 from enum import IntEnum
-from typing import List, Optional
+from typing import Optional
 
 
 class Priority(IntEnum):
@@ -37,7 +37,7 @@ class Item:
     def __init__(self,
                  name: str,
                  priority: Optional[Priority] = None,
-                 tags: Optional[List[str]] = None
+                 tags: Optional[list[str]] = None
                  ):
         """
         Constructor.

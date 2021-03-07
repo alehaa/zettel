@@ -7,7 +7,7 @@
 # this source code.
 
 from datetime import date
-from typing import List, Optional
+from typing import Optional
 
 from .item import Item, Priority
 
@@ -24,7 +24,7 @@ class Task(Item):
     def __init__(self,
                  name: str,
                  priority: Optional[Priority] = None,
-                 tags: Optional[List[str]] = None,
+                 tags: Optional[list[str]] = None,
                  due: Optional[date] = None
                  ):
         """
