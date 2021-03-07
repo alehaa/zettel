@@ -8,3 +8,5 @@
 
 from .item import Item, Priority
 from .task import Task
+
+from .provider import *

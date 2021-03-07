@@ -7,6 +7,7 @@
 # this source code.
 
 import abc
+import collections.abc
 
 from ..item import Item
 
@@ -21,7 +22,7 @@ class AbstractProvider(abc.ABC):
     """
 
     @abc.abstractmethod
-    def fetch(self) -> list[Item]:
+    def fetch(self) -> collections.abc.Iterable[Item]:
         """
         Fetch all items from the provider's backend.
 
