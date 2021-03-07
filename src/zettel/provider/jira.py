@@ -13,7 +13,7 @@ import zettel
 from typing import Optional
 
 
-class JiraProvider(zettel.AbstractProvider):
+class Provider(zettel.AbstractProvider):
     """
     JIRA issue provider.
 

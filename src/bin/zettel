@@ -9,7 +9,11 @@
 # this source code.
 
 import argparse
+import collections.abc
+import importlib
 import yaml
+
+import zettel
 
 
 def getArgs() -> argparse.Namespace:
@@ -52,6 +56,32 @@ def parseConfig(file: str) -> dict:
         return yaml.safe_load(f)
 
 
+def fetchItems(providers: list) -> collections.abc.Iterable[zettel.Item]:
+    """
+    Fetch items from configured ``providers``.
+
+    This function iterates over the given list of ``providers`` and temporary
+    loads them. Then, the provider class will be used to fetch all items from
+    the provider's backend, which will be passed through to the callee of this
+    function.
+
+
+    :param providers: The list of provider configurations to load items from.
+
+    :returns: Items the configured providers did return.
+    """
+    for p in providers:
+        # Load the provider's plugin as defined in the configuration and
+        # initialize the provider class with its default name. Any options
+        # defined in the configuration will be passed to the constructor.
+        mod = importlib.import_module(p['name'])
+        pro = mod.Provider(**p['opts'])
+
+        # Fetch all items from this provider and pass them through to the callee
+        # of this function.
+        yield from pro.fetch()
+
+
 # ========================
 # Run the main application
 # ========================
@@ -60,3 +90,8 @@ if __name__ == '__main__':
     # Parse the command line arguments. If necessary, this function will print
     # error messages and exits the application on errors.
     args = getArgs()
+
+    # Create a storage object for all items and feed it with all items fetched
+    # from the providers as defined in the configuration.
+    items = list()
+    items.extend(fetchItems(args.config['providers']))
