@@ -1,0 +1,18 @@
+# This file is part of Zettel.
+#
+# Copyright (c) Alexander Haase <ahaase@alexhaase.de>
+#
+# This project is licensed under the MIT License. For the full copyright and
+# license information, please view the LICENSE file that was distributed with
+# this source code.
+
+providers:
+  - name: zettel.provider.jira
+    opts:
+      server: https://jira.example.com
+      auth:   ['user', 'Passw0rd']
+      filter: assignee = currentUser() and status != done
+      priorities:
+        low:    2 # Priority.LOW
+        medium: 3 # Priority.MEDIUM
+        high:   4 # Priority.HIGH
