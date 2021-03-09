@@ -25,7 +25,7 @@ class Provider(zettel.AbstractProvider):
                  filter: str,
                  format: str = '{i.key} {i.fields.summary}',
                  priorities: dict[str, zettel.Priority] = {},
-                 ** kwargs
+                 **kwargs
                  ):
         """
         Constructor.

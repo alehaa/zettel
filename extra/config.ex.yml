@@ -16,3 +16,11 @@ providers:
         low:    2 # Priority.LOW
         medium: 3 # Priority.MEDIUM
         high:   4 # Priority.HIGH
+
+printer:
+  name: zettel.printer.escpos
+  opts:
+    type:      Usb
+    idVendor:  0x04b8
+    idProduct: 0x0202
+    profile:   TM-T88III
