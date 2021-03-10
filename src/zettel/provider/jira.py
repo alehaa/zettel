@@ -53,7 +53,7 @@ class Provider(zettel.AbstractProvider):
         # multiple times.
         self._jira = jira.JIRA(**kwargs)
 
-    def _parsePriority(self, name) -> Optional[zettel.Priority]:
+    def _parsePriority(self, name: str) -> Optional[zettel.Priority]:
         """
         Match the issue's priority to a basic Zettel :py:class:`.Priority`.
 
@@ -66,7 +66,7 @@ class Provider(zettel.AbstractProvider):
         return self._priorities.get(name)
 
     @staticmethod
-    def _parseDate(datestr) -> Optional[datetime.date]:
+    def _parseDate(datestr: str) -> Optional[datetime.date]:
         """
         Convert a ``datestr`` into a :py:class:`datetime.date`.
 

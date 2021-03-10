@@ -36,7 +36,7 @@ class AbstractPrinter(contextlib.AbstractContextManager):
         pass
 
     @abc.abstractmethod
-    def text(self, s) -> None:
+    def text(self, s: str) -> None:
         """
         Print a line of text.
 

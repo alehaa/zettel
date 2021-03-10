@@ -52,7 +52,7 @@ class Printer(zettel.AbstractPrinter):
         """
         self._printer.cut()
 
-    def text(self, s, prefix='') -> None:
+    def text(self, s: str, prefix: str = '') -> None:
         """
         Print a line of text.
 
