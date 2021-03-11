@@ -9,6 +9,7 @@
 import escpos.printer
 import textwrap
 import zettel
+from contextlib import contextmanager
 
 
 class Printer(zettel.AbstractPrinter):
@@ -43,6 +44,12 @@ class Printer(zettel.AbstractPrinter):
         # remaining arguments to its constructor.
         self._printer = getattr(escpos.printer, type)(**kwargs)
 
+        # The backend driver just provides a single method for setting format
+        # related parameters. Therefore, the following dictionary keeps track on
+        # the used parameters to allow these to be set individually by the
+        # related format methods of this class.
+        self._param: dict = {}
+
     def __exit__(self,  exc_type, exc_value, exc_traceback) -> None:
         """
         Exit the printing context.
@@ -51,6 +58,42 @@ class Printer(zettel.AbstractPrinter):
         exceptions don't have effects on this.
         """
         self._printer.cut()
+
+    @contextmanager
+    def _set(self, **kwargs):
+        """
+        Set text format parameters for the printer's backend driver.
+
+        This method is a wrapper for the ``set()`` function of ``python-escpos``
+        to keep track of its arguments, allowing to set just a single one once
+        at a time without altering the other ones. It's intended use is as
+        context manager, setting the format inside a ``with`` block and
+        restoring the original behaviour at its end.
+
+
+        :param: All arguments passed to this function will be passed through to
+            the backend driver. See the documentation of ``set()`` from
+            ``python-escpos`` for allowed arguments.
+        """
+        # Save a copy of the current parameter set to restore it after executing
+        # the context. Unfortunately, simply removing the parameters set after
+        # the context is not an option, as this would compromise setting the
+        # same parameter in nested contexts and lead to side effects.
+        tmp = self._param.copy()
+
+        # Update the internal parameter state with the arguments passed to this
+        # method. The combined list of parameters will be used to update the
+        # printer's state before entering the context by yielding.
+        try:
+            self._param.update(kwargs)
+            self._printer.set(**self._param)
+            yield
+
+        # After executing the context, restore the internal parameter state with
+        # its original contents before updating the printer's state yet again.
+        finally:
+            self._param = tmp
+            self._printer.set(**self._param)
 
     def text(self, s: str, prefix: str = '') -> None:
         """
@@ -68,8 +111,12 @@ class Printer(zettel.AbstractPrinter):
             lines will be indented by the length of the prefix.
         """
         # Calculate the desired line length (without prefix) and split the input
-        # string into multiple lines with the calculated maximum line length.
-        lines = textwrap.wrap(s, (self._width - len(prefix)))
+        # string into multiple lines with the calculated maximum line length. If
+        # the 'double_width' format parameter is set, the half width will be
+        # used instead automatically.
+        width = (self._width if not self._param.get('double_width')
+                 else (self._width / 2))
+        lines = textwrap.wrap(s, (width - len(prefix)))
 
         # Print the first line including the prefix. Then, if the text exceeds a
         # single line, following lines will be printed with an indentation
@@ -79,3 +126,23 @@ class Printer(zettel.AbstractPrinter):
         for l in lines[1:]:
             self._printer.text(''.ljust(len(prefix)))
             self._printer.text(f'{l}\n')
+
+    def heading(self, s: str, large: bool = True) -> None:
+        """
+        Print a section heading.
+
+
+        :param s: The text to be printed.
+        :param large: Whether to print the text double sized or regular.
+        """
+        with self._set(bold=True, double_height=large, double_width=large):
+            self.text(f'{s}\n')
+
+        # To highlight the heading from the surrounding text, an empty line will
+        # follow large headings. It needs to be added after the context above,
+        # as it won't have effects in a 'double_height' environment.
+        #
+        # NOTE: The internal text method can't be used, as the textwrap
+        #       mechanism will see this as empty text and won't operate.
+        if large:
+            self._printer.text('\n')

@@ -47,3 +47,14 @@ class AbstractPrinter(contextlib.AbstractContextManager):
         :param s: The text to be printed.
         """
         pass
+
+    @abc.abstractmethod
+    def heading(self, s: str, large: bool = True) -> None:
+        """
+        Print a section heading.
+
+
+        :param s: The text to be printed.
+        :param large: Whether to use a large or small heading.
+        """
+        pass
