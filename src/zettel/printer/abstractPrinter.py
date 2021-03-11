@@ -36,6 +36,13 @@ class AbstractPrinter(contextlib.AbstractContextManager):
         pass
 
     @abc.abstractmethod
+    def blank(self) -> None:
+        """
+        Print an empty line.
+        """
+        pass
+
+    @abc.abstractmethod
     def text(self, s: str) -> None:
         """
         Print a line of text.

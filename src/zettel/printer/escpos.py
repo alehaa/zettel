@@ -95,6 +95,12 @@ class Printer(zettel.AbstractPrinter):
             self._param = tmp
             self._printer.set(**self._param)
 
+    def blank(self) -> None:
+        """
+        Print an empty line.
+        """
+        self._printer.text('\n')
+
     def text(self, s: str, prefix: str = '') -> None:
         """
         Print a line of text.
@@ -141,11 +147,8 @@ class Printer(zettel.AbstractPrinter):
         # To highlight the heading from the surrounding text, an empty line will
         # follow large headings. It needs to be added after the context above,
         # as it won't have effects in a 'double_height' environment.
-        #
-        # NOTE: The internal text method can't be used, as the textwrap
-        #       mechanism will see this as empty text and won't operate.
         if large:
-            self._printer.text('\n')
+            self.blank()
 
     @contextmanager
     def center(self):
