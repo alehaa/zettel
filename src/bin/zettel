@@ -95,3 +95,22 @@ if __name__ == '__main__':
     # from the providers as defined in the configuration.
     items = list()
     items.extend(fetchItems(args.config['providers']))
+
+    # Get the configured printing driver by loading the related module and
+    # initializing the printing class as defined via API. All options defined in
+    # the configuration will be passed through to the printing class. Entering
+    # the printing context finally initializes the printer and shuts it down
+    # when leaving the context.
+    mod = importlib.import_module(args.config['printer']['name'])
+    arg = args.config['printer'].get('opts', {})
+    with mod.Printer(**arg) as printer:
+        # Get the configured template module and run its printing function as
+        # defined via API. The item storage and printing driver will be passed
+        # as parameters, giving the template full controll about the
+        # representation of the data.
+        #
+        # NOTE: If no template is defined in the configuration, the default one
+        #       will be used instead.
+        template = importlib.import_module(
+            args.config.get('template', 'zettel.template.default'))
+        template.printTemplate(items, printer)

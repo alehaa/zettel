@@ -17,6 +17,13 @@ providers:
         medium: 3 # Priority.MEDIUM
         high:   4 # Priority.HIGH
 
+
+# ========
+# printing
+# ========
+
+# template: zettel.template.default
+
 printer:
   name: zettel.printer.escpos
   opts:
