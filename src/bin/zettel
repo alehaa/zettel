@@ -107,10 +107,9 @@ if __name__ == '__main__':
         # Get the configured template module and run its printing function as
         # defined via API. The item storage and printing driver will be passed
         # as parameters, giving the template full controll about the
-        # representation of the data.
-        #
-        # NOTE: If no template is defined in the configuration, the default one
-        #       will be used instead.
-        template = importlib.import_module(
-            args.config.get('template', 'zettel.template.default'))
-        template.printTemplate(items, printer)
+        # representation of the data. Additional options defined in the
+        # configuration will be passed through to the function and can be used
+        # to alter the templates functionality.
+        template = importlib.import_module(args.config['template']['name'])
+        template.printTemplate(items, printer,
+                               **(args.config['template'].get('opts', {})))

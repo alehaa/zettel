@@ -22,7 +22,10 @@ providers:
 # printing
 # ========
 
-# template: zettel.template.default
+template:
+  name: zettel.template.default
+  # opts:
+  #   lang: de
 
 printer:
   name: zettel.printer.escpos

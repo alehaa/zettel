@@ -10,10 +10,50 @@ import babel.dates
 import datetime
 import zettel
 
+# Internationalization dictionary, containing all messages of this template in
+# various languages.
+#
+# NOTE: If a message key is introduced, it needs to be available at least in the
+#       english subkey, as its the fallback for all other languages.
+messages = {
+    # English, the default
+    'en': {
+        'tasks': 'Tasks',
+    },
+
+    # German
+    'de': {
+        'tasks': 'Aufgaben',
+    },
+}
+
+
+def trans(lang: str, key: str) -> str:
+    """
+    Get translated message for a specific key.
+
+    This function looks up the translation for a specific key. If no translation
+    is available in the selected language, the default word in english will be
+    used instead.
+
+
+    :param lang: The desired language.
+    :param key: The message key.
+
+    :returns: The translated message key.
+    """
+    return messages.get(lang).get(key, messages['en'][key])
+
 
 def printTemplate(bucket: list[zettel.Item],
-                  p: zettel.AbstractPrinter
+                  p: zettel.AbstractPrinter,
+                  lang: str = 'en'
                   ):
+    # Define a shortcut function to avoid passing the 'lang' argument on every
+    # message lookup call.
+    def m(key: str) -> str:
+        return trans(lang, key)
+
     # ======
     # Header
     # ======
@@ -28,7 +68,7 @@ def printTemplate(bucket: list[zettel.Item],
     # =====
 
     with p.center():
-        p.heading('ToDo')
+        p.heading(m('tasks'))
 
     for i in bucket:
         p.listItem(i.name, checkbox=True)
