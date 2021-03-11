@@ -58,3 +58,47 @@ class AbstractPrinter(contextlib.AbstractContextManager):
         :param large: Whether to use a large or small heading.
         """
         pass
+
+    @abc.abstractmethod
+    def center(self):
+        """
+        Context manager for centered text.
+
+        Printing driver classes should implement this method with the
+        ``@contextmanager`` decorator applied to execute commands to format the
+        text before and after the context manager's body.
+        """
+        pass
+
+    @abc.abstractmethod
+    def bold(self):
+        """
+        Context manager for bold text.
+
+        Printing driver classes should implement this method with the
+        ``@contextmanager`` decorator applied to execute commands to format the
+        text before and after the context manager's body.
+        """
+        pass
+
+    @abc.abstractmethod
+    def underline(self):
+        """
+        Context manager for underlined text.
+
+        Printing driver classes should implement this method with the
+        ``@contextmanager`` decorator applied to execute commands to format the
+        text before and after the context manager's body.
+        """
+        pass
+
+    @abc.abstractmethod
+    def highlight(self):
+        """
+        Context manager for highlighted text.
+
+        Printing driver classes should implement this method with the
+        ``@contextmanager`` decorator applied to execute commands to format the
+        text before and after the context manager's body.
+        """
+        pass

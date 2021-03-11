@@ -146,3 +146,23 @@ class Printer(zettel.AbstractPrinter):
         #       mechanism will see this as empty text and won't operate.
         if large:
             self._printer.text('\n')
+
+    @contextmanager
+    def center(self):
+        with self._set(align='center'):
+            yield
+
+    @contextmanager
+    def bold(self):
+        with self._set(bold=True):
+            yield
+
+    @contextmanager
+    def underline(self):
+        with self._set(underline=True):
+            yield
+
+    @contextmanager
+    def highlight(self):
+        with self._set(invert=True):
+            yield
