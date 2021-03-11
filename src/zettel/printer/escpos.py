@@ -166,3 +166,6 @@ class Printer(zettel.AbstractPrinter):
     def highlight(self):
         with self._set(invert=True):
             yield
+
+    def listItem(self, s: str, checkbox: bool = False) -> None:
+        self.text(s, prefix=('- ' if not checkbox else '[ ] '))

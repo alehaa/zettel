@@ -102,3 +102,22 @@ class AbstractPrinter(contextlib.AbstractContextManager):
         text before and after the context manager's body.
         """
         pass
+
+    @abc.abstractmethod
+    def listItem(self, s: str, checkbox: bool = False) -> None:
+        """
+        Print a list item.
+
+        This method prints a list item and allows setting vaious styles by
+        changing its parameters.
+
+        .. note:: This method doesn't provide a context manager and therefore is
+            not compatible with printing drivers requireing some surrounding
+            context around the individual list items. If that will be the case,
+            this method needs to be refactored.
+
+
+        :param s: The text to be printed.
+        :param checkbox: Whether this list item is a checkbox or a regular one.
+        """
+        pass
