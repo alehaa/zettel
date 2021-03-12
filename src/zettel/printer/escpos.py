@@ -20,7 +20,7 @@ class Printer(zettel.AbstractPrinter):
     thermal printer.
     """
 
-    def __init__(self, type: str, width=42, **kwargs):
+    def __init__(self, type: str, width=42, **kwargs) -> None:
         """
         Constructor.
 

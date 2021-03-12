@@ -26,7 +26,7 @@ class Task(Item):
                  priority: Optional[Priority] = None,
                  tags: Optional[list[str]] = None,
                  due: Optional[date] = None
-                 ):
+                 ) -> None:
         """
         Constructor.
 

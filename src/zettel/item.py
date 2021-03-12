@@ -38,7 +38,7 @@ class Item:
                  name: str,
                  priority: Optional[Priority] = None,
                  tags: Optional[list[str]] = None
-                 ):
+                 ) -> None:
         """
         Constructor.
 
