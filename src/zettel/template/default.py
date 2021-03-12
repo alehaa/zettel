@@ -42,7 +42,7 @@ def trans(lang: str, key: str) -> str:
 
     :returns: The translated message key.
     """
-    return messages.get(lang).get(key, messages['en'][key])
+    return messages[lang].get(key, messages['en'][key])
 
 
 def printTemplate(bucket: list[zettel.Item],
