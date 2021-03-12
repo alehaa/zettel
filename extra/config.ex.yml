@@ -17,6 +17,14 @@ providers:
         medium: MEDIUM # Priority.MEDIUM
         high:   HIGH   # Priority.HIGH
 
+  - name: zettel.provider.exchange
+    opts:
+      server:  mail.example.com
+      account: hello@world.com
+      credentials:
+        username: user
+        password: Passw0rd
+
 
 # ========
 # printing
