@@ -6,6 +6,7 @@
 # license information, please view the LICENSE file that was distributed with
 # this source code.
 
+from .bucket import Bucket
 from .item import Item, Priority
 from .task import Task
 

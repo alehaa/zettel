@@ -9,6 +9,8 @@
 import babel.dates
 import datetime
 import zettel
+from typing import Callable
+
 
 # Internationalization dictionary, containing all messages of this template in
 # various languages.
@@ -19,11 +21,15 @@ messages = {
     # English, the default
     'en': {
         'tasks': 'Tasks',
+        'tasks_overdue': 'overdue',
+        'tasks_today': 'today',
     },
 
     # German
     'de': {
         'tasks': 'Aufgaben',
+        'tasks_overdue': 'überfällig',
+        'tasks_today': 'heute',
     },
 }
 
@@ -45,7 +51,7 @@ def trans(lang: str, key: str) -> str:
     return messages[lang].get(key, messages['en'][key])
 
 
-def printTemplate(bucket: list[zettel.Item],
+def printTemplate(bucket: zettel.Bucket,
                   p: zettel.AbstractPrinter,
                   lang: str = 'en'
                   ):
@@ -67,8 +73,34 @@ def printTemplate(bucket: list[zettel.Item],
     # Tasks
     # =====
 
-    with p.center():
-        p.heading(m('tasks'))
+    # Use a helper function to print sections of selected tasks, matching a
+    # specific criteria. These tasks will be removed from the
+    def print_tasks(filter: Callable[[zettel.Task], bool], title: str) -> None:
+        matches = tasks.fetch(filter)
+        if matches:
+            with p.underline():
+                p.heading(m(title), large=False)
+            for t in matches:
+                p.listItem(t.name, checkbox=False)
+            p.blank()
 
-    for i in bucket:
-        p.listItem(i.name, checkbox=True)
+    # Get all tasks from the item bucket. If at least one task is in the bucket,
+    # the following section will be processed and printed.
+    tasks: zettel.Bucket[zettel.Task] = bucket.fetch(
+        lambda i: isinstance(i, zettel.Task))
+    if tasks:
+        # To get a list of tasks sorted by priority and within each priority by
+        # date, sort the list by these criteria in reverse order.
+        tasks.sort(key=(lambda t: t.due if t.due else datetime.date.max))
+        tasks.sort(key=(lambda t: t.priority
+                        if t.priority else zettel.Priority.MEDIUM),
+                   reverse=True)
+
+        with p.center():
+            p.heading(m('tasks'))
+        print_tasks(lambda t: bool(t.due and t.due < datetime.date.today()),
+                    'tasks_overdue')
+        print_tasks(lambda t: (t.due == datetime.date.today()),
+                    'tasks_today')
+        for t in tasks:
+            p.listItem(t.name, checkbox=False)

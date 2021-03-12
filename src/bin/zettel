@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
     # Create a storage object for all items and feed it with all items fetched
     # from the providers as defined in the configuration.
-    items = list()
+    items = zettel.Bucket()
     items.extend(fetchItems(args.config['providers']))
 
     # Get the configured printing driver by loading the related module and
