@@ -8,8 +8,9 @@
 
 import abc
 import collections.abc
+from typing import cast, Union
 
-from ..item import Item
+from ..item import Item, Priority
 
 
 class AbstractProvider(abc.ABC):
@@ -20,6 +21,23 @@ class AbstractProvider(abc.ABC):
     provider basically is just a single method to be called, these classes won't
     be complicated in design, but require a standard API to gather all items.
     """
+
+    @staticmethod
+    def _convertPriority(src: Union[str, int]) -> Priority:
+        """
+        Convert a priority from string or integer to :py:class:`.Priority`.
+
+        This method takes a given string or integer and maps it to its related
+        Zettel :py:class:`.Item` :py:class:`.Priority`. It can be used to parse
+        the provider specific configurations into uniform Zettel abstractions in
+        the provider's constructor.
+
+
+        :param src: The source integer or string to be converted.
+
+        :returns: The converted :py:class:`.Priority` object.
+        """
+        return (Priority[cast(str, src)] if type(src) is str else Priority(src))
 
     @abc.abstractmethod
     def fetch(self) -> collections.abc.Iterable[Item]:

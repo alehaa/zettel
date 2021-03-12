@@ -10,7 +10,7 @@ import collections.abc
 import datetime
 import jira
 import zettel
-from typing import Optional
+from typing import Optional, Union
 
 
 class Provider(zettel.AbstractProvider):
@@ -24,7 +24,7 @@ class Provider(zettel.AbstractProvider):
     def __init__(self,
                  filter: str,
                  format: str = '{i.key} {i.fields.summary}',
-                 priorities: dict[str, zettel.Priority] = {},
+                 priorities: dict[str, Union[str, int, zettel.Priority]] = {},
                  **kwargs
                  ) -> None:
         """
@@ -43,7 +43,8 @@ class Provider(zettel.AbstractProvider):
         """
         self._filter = filter
         self._format = format
-        self._priorities = priorities
+        self._priorities = {k: self._convertPriority(v)
+                            for k, v in priorities.items()}
 
         # Initialize the connection to the given JIRA server with the remaining
         # arguments passed to this constructor. Usually it would be sufficient

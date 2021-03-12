@@ -13,9 +13,9 @@ providers:
       auth:   ['user', 'Passw0rd']
       filter: assignee = currentUser() and status != done
       priorities:
-        low:    2 # Priority.LOW
-        medium: 3 # Priority.MEDIUM
-        high:   4 # Priority.HIGH
+        low:    LOW    # Priority.LOW
+        medium: MEDIUM # Priority.MEDIUM
+        high:   HIGH   # Priority.HIGH
 
 
 # ========
