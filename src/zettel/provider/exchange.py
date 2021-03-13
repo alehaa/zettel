@@ -82,14 +82,11 @@ class Provider(zettel.AbstractProvider):
             related calendar events in the Micrsoft Exchange account.
         """
         # Use a helper function to get a timezone aware datetime object for
-        # today's date. An optional delta parameter can be used to get the
-        # datetime object for midnight on following dates, i.e. to match events
-        # between two midnight timestamps.
-        def toTime(delta: int = 0) -> datetime.datetime:
-            return datetime.datetime.combine(
-                datetime.date.today() + datetime.timedelta(delta),
-                datetime.datetime.min.time(),
-                tzinfo=self._account.default_timezone)
+        # today's date. The 'min' parameter can be used to select either the min
+        # or max time of the day, i.e. to match events between two midnight
+        # timestamps.
+        def time(min: bool = True) -> datetime.datetime:
+            return zettel.Event.timeToday(min, self._account.default_timezone)
 
         # Objects from the exchange API will use timestamps in UTC by default.
         # This helper function will add the local system's timezone, so printing
@@ -107,13 +104,12 @@ class Provider(zettel.AbstractProvider):
         # as configured in the constructor. These events will be converted into
         # Zettel Event objects, by selecting and converting the necessary event
         # attributes.
-        for event in self._account.calendar.view(start=toTime(), end=toTime(1)):
+        for event in self._account.calendar.view(start=time(), end=time(False)):
             yield zettel.Event(
                 event.subject,
                 withTimezone(event.start),
                 withTimezone(event.end),
-                (event.is_all_day or (event.start < toTime()
-                                      and toTime(1) < event.end)),
+                event.is_all_day,
                 self._parsePriority(event.importance)
             )
 
