@@ -94,8 +94,14 @@ class Provider(zettel.AbstractProvider):
         # Objects from the exchange API will use timestamps in UTC by default.
         # This helper function will add the local system's timezone, so printing
         # the event will have the right one applied.
-        def withTimezone(d) -> Union[datetime.date, datetime.datetime]:
-            return (d.astimezone() if isinstance(d, datetime.datetime) else d)
+        #
+        # NOTE: If just a date is pased, it will be converted to datetime to
+        #       allow comparisons between different event items.
+        def withTimezone(d) -> datetime.datetime:
+            return (d if isinstance(d, datetime.datetime)
+                    else datetime.datetime.combine(d,
+                                                   datetime.datetime.min.time())
+                    ).astimezone()
 
         # Fetch all events in todays schedule from the Micrsoft Exchange server,
         # as configured in the constructor. These events will be converted into

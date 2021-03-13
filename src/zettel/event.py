@@ -22,8 +22,8 @@ class Event(Item):
 
     def __init__(self,
                  name: str,
-                 start: Union[datetime.date, datetime.datetime],
-                 end: Union[datetime.date, datetime.datetime],
+                 start: datetime.datetime,
+                 end: datetime.datetime,
                  all_day: bool = False,
                  priority: Optional[Priority] = None,
                  tags: Optional[list[str]] = None
