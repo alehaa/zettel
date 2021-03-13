@@ -20,6 +20,8 @@ from typing import Callable
 messages = {
     # English, the default
     'en': {
+        'events': 'Events',
+        'events_allday': 'all day',
         'tasks': 'Tasks',
         'tasks_overdue': 'overdue',
         'tasks_today': 'today',
@@ -27,6 +29,8 @@ messages = {
 
     # German
     'de': {
+        'events': 'Termine',
+        'events_allday': 'ganztägig',
         'tasks': 'Aufgaben',
         'tasks_overdue': 'überfällig',
         'tasks_today': 'heute',
@@ -67,6 +71,30 @@ def printTemplate(bucket: zettel.Bucket,
     with p.center():
         p.text(babel.dates.format_datetime(datetime.datetime.now(),
                                            format='short'))
+        p.blank()
+
+    # ======
+    # Events
+    # ======
+
+    events: zettel.Bucket[zettel.Event] = bucket.fetch(
+        lambda e: isinstance(e, zettel.Event))
+    if events:
+        # Events should be ordered in chronological order. Therefore, the list
+        # of events will be ordered by start date. However, events with the same
+        # start time might be sorted instable for subsequent printouts, as the
+        # API might return these in random order.
+        events.sort(key=(lambda e: e.start))
+
+        with p.center():
+            p.heading(m('events'))
+        for e in events:
+            p.twocols(
+                (m('events_allday').center(13) if e.all_day
+                 else '{} - {}'.format(e.start.strftime('%H:%M'),
+                                       e.end.strftime('%H:%M'))),
+                e.name,
+                highlight=e.all_day)
         p.blank()
 
     # =====

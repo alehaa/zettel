@@ -10,7 +10,7 @@ import collections.abc
 import datetime
 import exchangelib
 import zettel
-from typing import Optional
+from typing import Optional, Union
 
 
 class Provider(zettel.AbstractProvider):
@@ -70,6 +70,47 @@ class Provider(zettel.AbstractProvider):
             'High': zettel.Priority.HIGH
         }.get(name)
 
+    def _fetchCalendar(self):
+        """
+        Fetch calender events scheduled for today.
+
+        This method will get all calendar events from the configured Micrsoft
+        Exchange account, that are visible in the schedule of today's date.
+
+
+        :returns: An iterable list of :py:class:`.Event` objects, representing
+            related calendar events in the Micrsoft Exchange account.
+        """
+        # Use a helper function to get a timezone aware datetime object for
+        # today's date. An optional delta parameter can be used to get the
+        # datetime object for midnight on following dates, i.e. to match events
+        # between two midnight timestamps.
+        def toTime(delta: int = 0) -> datetime.datetime:
+            return datetime.datetime.combine(
+                datetime.date.today() + datetime.timedelta(delta),
+                datetime.datetime.min.time(),
+                tzinfo=self._account.default_timezone)
+
+        # Objects from the exchange API will use timestamps in UTC by default.
+        # This helper function will add the local system's timezone, so printing
+        # the event will have the right one applied.
+        def withTimezone(d) -> Union[datetime.date, datetime.datetime]:
+            return (d.astimezone() if isinstance(d, datetime.datetime) else d)
+
+        # Fetch all events in todays schedule from the Micrsoft Exchange server,
+        # as configured in the constructor. These events will be converted into
+        # Zettel Event objects, by selecting and converting the necessary event
+        # attributes.
+        for event in self._account.calendar.view(start=toTime(), end=toTime(1)):
+            yield zettel.Event(
+                event.subject,
+                withTimezone(event.start),
+                withTimezone(event.end),
+                (event.is_all_day or (event.start < toTime()
+                                      and toTime(1) < event.end)),
+                self._parsePriority(event.importance)
+            )
+
     def _fetchTasks(self) -> collections.abc.Iterable[zettel.Task]:
         """
         Fetch all tasks managed in the Micrsoft Exchange account.
@@ -101,4 +142,5 @@ class Provider(zettel.AbstractProvider):
         :returns: An iterable list of :py:class:`.Item` objects, representing
             related objects in the Micrsoft Exchange account.
         """
+        yield from self._fetchCalendar()
         yield from self._fetchTasks()

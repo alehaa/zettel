@@ -43,7 +43,7 @@ class AbstractPrinter(contextlib.AbstractContextManager):
         pass
 
     @abc.abstractmethod
-    def text(self, s: str) -> None:
+    def text(self, s: str, end: str = '\n') -> None:
         """
         Print a line of text.
 
@@ -52,6 +52,7 @@ class AbstractPrinter(contextlib.AbstractContextManager):
 
 
         :param s: The text to be printed.
+        :param end: The line ending. By default this should be a linefeed.
         """
         pass
 
@@ -126,5 +127,20 @@ class AbstractPrinter(contextlib.AbstractContextManager):
 
         :param s: The text to be printed.
         :param checkbox: Whether this list item is a checkbox or a regular one.
+        """
+        pass
+
+    @abc.abstractmethod
+    def twocols(self, key: str, value: str, highlight: bool = False) -> None:
+        """
+        Print a two column table row.
+
+        This method prints a ``key`` ``value`` pair as table row. However, its
+        not responsible for printing an entire table.
+
+
+        :param key: The key to be printed (first column).
+        :param value: The value to be printed (second column).
+        :param highlight: Whether to highlight the key column.
         """
         pass

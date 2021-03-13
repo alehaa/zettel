@@ -8,6 +8,7 @@
 
 from .bucket import Bucket
 from .item import Item, Priority
+from .event import Event
 from .task import Task
 
 from .printer import *

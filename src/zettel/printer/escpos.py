@@ -9,7 +9,7 @@
 import escpos.printer
 import textwrap
 import zettel
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 
 
 class Printer(zettel.AbstractPrinter):
@@ -101,7 +101,12 @@ class Printer(zettel.AbstractPrinter):
         """
         self._printer.text('\n')
 
-    def text(self, s: str, prefix: str = '') -> None:
+    def text(self,
+             s: str,
+             end: str = '\n',
+             prefix: str = '',
+             skip_prefix: bool = False
+             ) -> None:
         """
         Print a line of text.
 
@@ -113,8 +118,13 @@ class Printer(zettel.AbstractPrinter):
 
 
         :param s: The text to be printed.
+        :param end: The line ending. By default this will be a linefeed.
         :param prefix: A prefix to be printed in the first line. Consecutive
-            lines will be indented by the length of the prefix.
+            lines will be indented by the length of the prefix. This parameter
+            is intended for internal use of this class only.
+        :param skip_prefix: Whether to skip printing the prefix, i.e. if it has
+            been printed by another method already. This parameter is intended
+            for internal use of this class only.
         """
         # Calculate the desired line length (without prefix) and split the input
         # string into multiple lines with the calculated maximum line length. If
@@ -127,11 +137,12 @@ class Printer(zettel.AbstractPrinter):
         # Print the first line including the prefix. Then, if the text exceeds a
         # single line, following lines will be printed with an indentation
         # matching the prefix length.
-        self._printer.text(prefix)
-        self._printer.text(f'{lines[0]}\n')
+        if not skip_prefix:
+            self._printer.text(prefix)
+        self._printer.text(f'{lines[0]}{end}')
         for l in lines[1:]:
             self._printer.text(''.ljust(len(prefix)))
-            self._printer.text(f'{l}\n')
+            self._printer.text(f'{l}{end}')
 
     def heading(self, s: str, large: bool = True) -> None:
         """
@@ -172,3 +183,32 @@ class Printer(zettel.AbstractPrinter):
 
     def listItem(self, s: str, checkbox: bool = False) -> None:
         self.text(s, prefix=('- ' if not checkbox else '[ ] '))
+
+    def twocols(self, key: str, value: str, highlight: bool = False) -> None:
+        """
+        Print a two column table row.
+
+        This method prints a ``key`` ``value`` pair as table row. However, its
+        not responsible for printing an entire table.
+
+        .. note:: This method doesn't keep track on the column's widths. Callees
+            need to maintain these themself by adjusting the string widths, i.e.
+            by padding its contents.
+
+        .. warning:: This method doesn't wrap text in the first column.
+
+
+        :param key: The key to be printed (first column).
+        :param value: The value to be printed (second column).
+        :param highlight: Whether to highlight the key column.
+        """
+        # Print the first column, either as regular text or in a highlighted
+        # context, if the parameter is set. To separate the columns, a spacer
+        # will be printed *after* the context to not highlight it. Raw
+        with (self.highlight() if highlight else nullcontext()):
+            self._printer.text(key)
+        self._printer.text(' ')
+
+        # Print the text for the second column, but skip the prefix (first
+        # column) to just indent the text of the second column.
+        self.text(value, prefix=f'{key} ', skip_prefix=True)
