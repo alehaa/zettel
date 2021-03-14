@@ -25,6 +25,10 @@ providers:
         username: user
         password: Passw0rd
 
+  - name: zettel.provider.icalendar
+    opts:
+      url: https://example.com/feed
+
 
 # ========
 # printing
