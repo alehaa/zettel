@@ -21,6 +21,52 @@ class Event(Item):
     """
 
     @staticmethod
+    def toDateTime(d: Union[datetime.date, datetime.datetime],
+                   end: bool = False,
+                   tzinfo: Optional[datetime.tzinfo] = None
+                   ) -> datetime.datetime:
+        """
+        Convert ``d`` into a standardized :py:class:`datetime.datetime`.
+
+        This method takes a :py:class:`datetime.date` or
+        :py:class:`datetime.datetime` object and converts it into a
+        timezone-aware :py:class:`datetime.datetime` object.
+
+        .. note:: Providers should use this method to generate a standardized
+            format of timestamps, which can be compared to each other and have
+            a timezone applied.
+
+
+        :param d: The :py:class:`datetime.datetime` or :py:class:`datetime.date`
+            compatible object to convert.
+        :param end: Whether this timestamp should represent the end of an event.
+            If ``d`` is just a :py:class:`datetime.date` object, this parameter
+            defines to use the maximum time of a day instead of the minimum.
+        :param tzinfo: Optional timezone information to use. If :py:class:`None`
+            is provided, the system's default timezone will be used.
+
+        :returns: The converted :py:class:`datetime.datetime` object.
+        """
+        return (
+            # If 'd' already is a datetime object, it can be used for further
+            # processing without converting.
+            d if isinstance(d, datetime.datetime)
+
+            # Otherwise it is assumed, 'd' is just a date object without time
+            # information. Therefore, this date will be merged with either the
+            # minimum time of a day, or the maximum, if an end timestamp should
+            # be generated.
+            else datetime.datetime.combine(
+                d,
+                (datetime.datetime.min.time() if not end
+                 else datetime.datetime.max.time()))
+
+            # Finally, apply the desired timezone to the original or generated
+            # datetime object. If no timezone has been defined, the system's
+            # default timezone will be used.
+        ).astimezone(tz=tzinfo)
+
+    @staticmethod
     def _isToday(d: Union[datetime.date, datetime.datetime]) -> bool:
         """
         Check if a specific date matches today's date.
@@ -35,28 +81,26 @@ class Event(Item):
         return ((d.date() if isinstance(d, datetime.datetime) else d)
                 == datetime.date.today())
 
-    @staticmethod
-    def timeToday(min: bool = True,
+    @classmethod
+    def timeToday(cls,
+                  end: bool = False,
                   tzinfo: Optional[datetime.tzinfo] = None
                   ) -> datetime.datetime:
         """
         Get a timestamp for today's date.
 
         For today's date, this method gets either the minimum date and time
-        (midnight) or the maximum (just before mifnight).
+        (midnight) or the maximum (just before midnight).
 
 
-        :param min: Whether to get the minimum or maximum date and time.
+        :param end: Whether the timestamp should represent the end of the day.
         :param tzinfo: Optional timezone information to use. If :py:class:`None`
             is provided, the system's default timezone will be used.
 
         :returns: The :py:class:`datetime.datetime` object matching the criteria
             defined via parameters.
         """
-        return datetime.datetime.combine(datetime.datetime.today(),
-                                         (datetime.datetime.min.time() if min
-                                          else datetime.datetime.max.time())
-                                         ).astimezone(tz=tzinfo)
+        return cls.toDateTime(datetime.date.today(), end, tzinfo)
 
     def __init__(self,
                  name: str,
@@ -112,4 +156,4 @@ class Event(Item):
         This method returns the end timestamp of this event. For events spanning
         multiple days, it will be at most midnight of today.
         """
-        return self._end if self._isToday(self._end) else self.timeToday(False)
+        return self._end if self._isToday(self._end) else self.timeToday(True)

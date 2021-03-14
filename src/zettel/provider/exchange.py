@@ -82,33 +82,26 @@ class Provider(zettel.AbstractProvider):
             related calendar events in the Micrsoft Exchange account.
         """
         # Use a helper function to get a timezone aware datetime object for
-        # today's date. The 'min' parameter can be used to select either the min
+        # today's date. The 'end' parameter can be used to select either the min
         # or max time of the day, i.e. to match events between two midnight
         # timestamps.
-        def time(min: bool = True) -> datetime.datetime:
-            return zettel.Event.timeToday(min, self._account.default_timezone)
-
-        # Objects from the exchange API will use timestamps in UTC by default.
-        # This helper function will add the local system's timezone, so printing
-        # the event will have the right one applied.
         #
-        # NOTE: If just a date is pased, it will be converted to datetime to
-        #       allow comparisons between different event items.
-        def withTimezone(d) -> datetime.datetime:
-            return (d if isinstance(d, datetime.datetime)
-                    else datetime.datetime.combine(d,
-                                                   datetime.datetime.min.time())
-                    ).astimezone()
+        # NOTE: The 'zettel.Event.timeToday' won't be used directly, as
+        #       Microsoft Exchange doesn't accept python's default timezones for
+        #       view search. Therefore, this function will pass the default
+        #       timezone defined in the account's profile.
+        def time(end: bool = False) -> datetime.datetime:
+            return zettel.Event.timeToday(end, self._account.default_timezone)
 
         # Fetch all events in todays schedule from the Micrsoft Exchange server,
         # as configured in the constructor. These events will be converted into
         # Zettel Event objects, by selecting and converting the necessary event
         # attributes.
-        for event in self._account.calendar.view(start=time(), end=time(False)):
+        for event in self._account.calendar.view(start=time(), end=time(True)):
             yield zettel.Event(
                 event.subject,
-                withTimezone(event.start),
-                withTimezone(event.end),
+                zettel.Event.toDateTime(event.start),
+                zettel.Event.toDateTime(event.end, True),
                 event.is_all_day,
                 self._parsePriority(event.importance)
             )
