@@ -29,6 +29,17 @@ providers:
     opts:
       url: https://example.com/feed
 
+  - name: zettel.provider.caldav
+    opts:
+      url:      https://example.com/CalDAV
+      username: user
+      password: Passw0rd
+      calendars:
+        - Private
+        - Work
+      todoLists:
+        - Reminders
+
 
 # ========
 # printing
