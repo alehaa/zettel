@@ -81,12 +81,8 @@ class Event(Item):
         :param tags: A list of tags, by which this event and other items could
             be grouped or filtered.
         """
-        # The start and end timestamp will be used as attributes for this event
-        # object. However, if the meeting doesn't start or end today, the
-        # timestamps will be capped to the minimum and maximum time of today for
-        # the right representation from today's perspective.
-        self.start = (start if self._isToday(start) else self.timeToday())
-        self.end = (end if self._isToday(end) else self.timeToday(False))
+        self._start = start
+        self._end = end
 
         # Flag the event as 'all day' not even just if the related parameter is
         # set, but for meetings spanning multiple days, as these are all day
@@ -97,3 +93,23 @@ class Event(Item):
         # As an event is basically just an item with additional attributes, the
         # remaining ones will be saved by initializing the parent class.
         super().__init__(name, priority, tags)
+
+    @property
+    def start(self) -> datetime.datetime:
+        """
+        Get the event's start time.
+
+        This method returns the start timestamp of this event. For events
+        spanning multiple days, it will be at least midnight of today.
+        """
+        return self._start if self._isToday(self._start) else self.timeToday()
+
+    @property
+    def end(self) -> datetime.datetime:
+        """
+        Get the event's end time.
+
+        This method returns the end timestamp of this event. For events spanning
+        multiple days, it will be at most midnight of today.
+        """
+        return self._end if self._isToday(self._end) else self.timeToday(False)
