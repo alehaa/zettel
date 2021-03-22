@@ -9,6 +9,7 @@
 import caldav
 import collections.abc
 import datetime
+import icalendar
 import zettel
 
 from .icalendar import Provider as iCalProvider
@@ -96,8 +97,12 @@ class Provider(zettel.AbstractProvider):
                     None,
                     task.decoded('DUE') if 'DUE' in task else None
                 ),
-                map(lambda t: t.icalendar_instance.subcomponents[0],
-                    todoList.todos()))
+                map(
+                    lambda l: next(filter(
+                        lambda i: isinstance(i, icalendar.cal.Todo),
+                        l)),
+                    map(lambda t: t.icalendar_instance.subcomponents,
+                        todoList.todos())))
 
     def fetch(self) -> collections.abc.Iterable[zettel.Item]:
         """
