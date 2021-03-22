@@ -11,6 +11,7 @@ import collections.abc
 import datetime
 import icalendar
 import zettel
+from typing import Union
 
 from .icalendar import Provider as iCalProvider
 
@@ -48,6 +49,23 @@ class Provider(zettel.AbstractProvider):
         # access the CalDAV ressources.
         self._calendars = [principal.calendar(name=c) for c in calendars]
         self._todoLists = [principal.calendar(name=t) for t in todoLists]
+
+    @staticmethod
+    def _toDate(d: Union[datetime.date, datetime.datetime]) -> datetime.date:
+        """
+        Convert a :py:class:`datetime.datetime` into :py:class:`datetime.date`.
+
+        This method takes a :py:class:`datetime.datetime` object as its input
+        and returns the underlaying :py:class:`datetime.date`. If ``d`` already
+        is of type :py:class:`datetime.date`, it will be passed through.
+
+
+        :param d: The :py:class:`datetime.datetime` or :py:class:`datetime.date`
+            object to be converted.
+
+        :returns: The converted date.
+        """
+        return d.date() if isinstance(d, datetime.datetime) else d
 
     def _fetchCalendar(self) -> collections.abc.Iterable[zettel.Event]:
         """
@@ -95,7 +113,7 @@ class Provider(zettel.AbstractProvider):
                         3: zettel.Priority.LOW
                     }.get(task.get('PRIORITY')),
                     None,
-                    task.decoded('DUE') if 'DUE' in task else None
+                    self._toDate(task.decoded('DUE')) if 'DUE' in task else None
                 ),
                 map(
                     lambda l: next(filter(
